@@ -1,7 +1,5 @@
 # alura-kafka-studies
 
-Course 1 - Kafka - Producers, Consumers, Streams
-
 ## Install
 Download and install Kafka latest. [link](https://kafka.apache.org/downloads)
 
@@ -53,3 +51,8 @@ Kafka and Zookeeper use its logs as records, so it's appropriate to change the d
 ## Notes
 * The max number of active consumers is determined by the number of partitions, because each consumer is going to read from a single partition.
 * The message key determines to which partition the message will be written. Kafka applies a hash on this key.
+
+## References
+
+* Alura
+  * [Kafka: Produtores, Consumidores e streams](https://cursos.alura.com.br/course/kafka-introducao-a-streams-em-microservicos)

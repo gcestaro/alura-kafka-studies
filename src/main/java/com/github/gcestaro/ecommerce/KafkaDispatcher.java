@@ -9,15 +9,15 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
-class KafkaDispatcher implements Closeable {
+class KafkaDispatcher<T> implements Closeable {
 
-  private final KafkaProducer<String, String> producer;
+  private final KafkaProducer<String, T> producer;
 
   KafkaDispatcher() {
     this.producer = new KafkaProducer<>(getProperties());
   }
 
-  void send(String topic, String key, String value) {
+  void send(String topic, String key, T value) {
     Callback callback = getCallback();
     var record = new ProducerRecord<>(topic, key, value);
 
@@ -46,7 +46,7 @@ class KafkaDispatcher implements Closeable {
     properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
         StringSerializer.class.getName());
     properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-        StringSerializer.class.getName());
+        GsonSerializer.class.getName());
 
     return properties;
   }

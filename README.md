@@ -12,7 +12,7 @@ Run commands in your Kafka installation folder (e.g ```kafka_2.13-3.2.1```)
 1. Start Zookeeper
    1.  ```bin/zookeeper-server-start.sh config/zookeeper.properties```
 2. Start Kafka
-    1. At your kafka installation folder, run: ```bin/kafka-server-start.sh config/server.properties```
+    1. ```bin/kafka-server-start.sh config/server.properties```
 
 ## Kafka Topics
 ### Create

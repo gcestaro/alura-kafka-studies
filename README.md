@@ -1,7 +1,14 @@
 # alura-kafka-studies
 
 ## Install
-Download and install Kafka latest. [link](https://kafka.apache.org/downloads)
+### Java 
+Java 17 was used. You can download it [here](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html) or try the other version [here](https://www.oracle.com/java/technologies/java-se-glance.html).
+
+### Maven
+Apache Maven 3.8.6 was used. You can download it [here](https://maven.apache.org/download.cgi)
+
+### Kafka
+Download and install the latest Kafka version [here](https://kafka.apache.org/downloads).
 
 Note: Version used at time was 3.2.1
 
@@ -55,4 +62,4 @@ Kafka and Zookeeper use its logs as records, so it's appropriate to change the d
 ## References
 
 * Alura
-  * [Kafka: Produtores, Consumidores e streams](https://cursos.alura.com.br/course/kafka-introducao-a-streams-em-microservicos)
+  * [Kafka: Producers, Consumers & Streams](https://cursos.alura.com.br/course/kafka-introducao-a-streams-em-microservicos)

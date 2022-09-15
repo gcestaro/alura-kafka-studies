@@ -1,5 +1,6 @@
 package com.github.gcestaro.ecommerce;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
@@ -15,10 +16,12 @@ public class FraudDetectorService {
   }
 
   private void parse(ConsumerRecord<String, Order> record) {
+    Order order = record.value();
+
     System.out.println("---------------------------------------------");
     System.out.println("Processing new order, checking for fraud");
     System.out.println(record.key());
-    System.out.println(record.value());
+    System.out.println(order);
     System.out.println(record.partition());
     System.out.println(record.offset());
     try {
@@ -26,6 +29,19 @@ public class FraudDetectorService {
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
-    System.out.println("Order processed");
+
+    if (isFraud(order)) {
+
+      System.out.println("It is a fraud!");
+    } else {
+
+      System.out.println("Order processed");
+    }
+  }
+
+  private boolean isFraud(Order order) {
+    // let's say it is a fraud if the value exceeds or is equal to 4.500
+
+    return order.getValue().compareTo(BigDecimal.valueOf(4500)) >= 0;
   }
 }

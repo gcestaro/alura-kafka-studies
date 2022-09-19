@@ -1,4 +1,4 @@
-# alura-kafka-studies
+# Kafka Studies
 
 ## Install
 
@@ -71,13 +71,14 @@ location:
 * Configure kafka logs directory in ```config/server.properties```
 * And Zookeeper in ```config/zookeeper.properties```
 
-## Cluster
+## Kafka Cluster
 
 It's possible to run multiple Kafka instances pointing to the same Zookeeper, creating a Kafka
 Cluster.
 In order to do that manually:
 
-1. Create another property file for the N Kafka instance (e.g. kafka2.properties). In this file:
+1. Stop all Kafka instances
+2. Create another property file for the N Kafka instance (e.g. kafka2.properties). In this file:
     1. Change the broker id (e.g. ```broker.id=2```)
     2. If running all instances on your local machine, change port: (
        e.g. ```listeners=PLAINTEXT://:9092```)
@@ -86,9 +87,9 @@ In order to do that manually:
        and ```transaction.state.log.replication.factor``` to 3 as suggested in the comments
     5. Create a default replication factor greater than default 1 (
        e.g. ```default.replication.factor = 3```)
-
-If needed, try stop all instances and clients, remove metadata and tmp files from ```log.dirs``` and
-run again.
+3. Remove metadata and tmp files from ```log.dirs``` path
+4. Run all Kafka instances you created, each one pointing to a different configuration properties
+   file (e.g. ```bin/kafka-server-start.sh config/server4.properties```)
 
 ## Notes
 

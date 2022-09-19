@@ -6,6 +6,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 public class FraudDetectorService {
 
+  private final KafkaDispatcher<Order> kafkaDispatcher = new KafkaDispatcher<>();
+
   public static void main(String[] args) {
     var fraudDetectorService = new FraudDetectorService();
 
@@ -31,10 +33,14 @@ public class FraudDetectorService {
     }
 
     if (isFraud(order)) {
-
       System.out.println("It is a fraud!");
+      kafkaDispatcher.send("ECOMMERCE_ORDER_REJECTED",
+          FraudDetectorService.class.getSimpleName(),
+          order);
     } else {
-
+      kafkaDispatcher.send("ECOMMERCE_ORDER_APPROVED",
+          order.getEmail(),
+          order);
       System.out.println("Order processed");
     }
   }

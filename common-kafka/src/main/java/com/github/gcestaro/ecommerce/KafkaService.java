@@ -1,6 +1,7 @@
 package com.github.gcestaro.ecommerce;
 
 import java.io.Closeable;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
@@ -42,7 +43,12 @@ class KafkaService<T> implements Closeable {
         System.out.println("Found " + records.count() + " records!");
 
         for (var record : records) {
-          function.consume(record);
+          try {
+            function.consume(record);
+          } catch (Exception e) {
+            // catch any exception and only logs. Process next message
+            e.printStackTrace();
+          }
         }
       }
     }

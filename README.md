@@ -97,6 +97,7 @@ In order to do that manually:
   consumer is going to read from a single partition.
 * The message key determines to which partition the message will be written. Kafka applies a hash on
   this key.
+* ISR = In Sync Replicas 
 
 ## References
 

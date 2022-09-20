@@ -1,6 +1,5 @@
 package com.github.gcestaro.ecommerce;
 
-import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -13,7 +12,8 @@ public class HttpEcommerceService {
     var context = new ServletContextHandler();
     context.setContextPath("/");
     context.addServlet(new ServletHolder(new NewOrderServlet()), "/new");
-    context.addServlet(new ServletHolder(new GenerateAllReportsServlet()), "/admin/generate-reports");
+    context.addServlet(new ServletHolder(new GenerateAllReportsServlet()),
+        "/admin/generate-reports");
 
     server.setHandler(context);
     server.start();

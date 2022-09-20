@@ -8,16 +8,18 @@ public class EmailService {
   public static void main(String[] args) {
     var emailService = new EmailService();
     try (var kafkaService = new KafkaService<>(EmailService.class.getSimpleName(),
-        "ECOMMERCE_SEND_EMAIL", emailService::parse, Email.class, Map.of())) {
+        "ECOMMERCE_SEND_EMAIL", emailService::parse, Map.of())) {
       kafkaService.run();
     }
   }
 
-  private void parse(ConsumerRecord<String, Email> record) {
+  private void parse(ConsumerRecord<String, Message<Email>> record) {
+    var message = record.value();
+
     System.out.println("---------------------------------------------");
     System.out.println("Sending email");
     System.out.println(record.key());
-    System.out.println(record.value());
+    System.out.println(message);
     System.out.println(record.partition());
     System.out.println(record.offset());
     try {

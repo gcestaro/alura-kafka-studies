@@ -24,9 +24,8 @@ public class NewOrderServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) {
 
-    String email = request.getParameter("email");
-    BigDecimal amount = new BigDecimal(request.getParameter("amount"));
-
+    var email = request.getParameter("email");
+    var amount = new BigDecimal(request.getParameter("amount"));
     var orderId = UUID.randomUUID().toString();
     var order = new Order(orderId, amount, email);
 
@@ -36,7 +35,7 @@ public class NewOrderServlet extends HttpServlet {
     var emailCode = new Email("test@test.com", emailMesssage);
     emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email, emailCode);
 
-    String message = "New order process executed successfully";
+    var message = "New order process executed successfully";
     System.out.println(message);
     try {
       response.getWriter().println(message);

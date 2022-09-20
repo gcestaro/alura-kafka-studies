@@ -11,15 +11,16 @@ import org.apache.kafka.common.serialization.StringSerializer;
 
 class KafkaDispatcher<T> implements Closeable {
 
-  private final KafkaProducer<String, T> producer;
+  private final KafkaProducer<String, Message<T>> producer;
 
   KafkaDispatcher() {
     this.producer = new KafkaProducer<>(getProperties());
   }
 
-  void send(String topic, String key, T value) {
-    Callback callback = getCallback();
-    var record = new ProducerRecord<>(topic, key, value);
+  void send(String topic, String key, T payload) {
+    var message = new Message<>(new CorrelationId(), payload);
+    var callback = getCallback();
+    var record = new ProducerRecord<>(topic, key, message);
 
     try {
       producer.send(record, callback).get();

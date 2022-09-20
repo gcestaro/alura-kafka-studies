@@ -15,18 +15,19 @@ public class ReadingReportService {
     var readingReportService = new ReadingReportService();
 
     try (var kafkaService = new KafkaService<>(ReadingReportService.class.getSimpleName(),
-        "USER_GENERATE_READING_REPORT", readingReportService::parse, User.class, Map.of())) {
+        "USER_GENERATE_READING_REPORT", readingReportService::parse, Map.of())) {
       kafkaService.run();
     }
   }
 
-  private void parse(ConsumerRecord<String, User> record) throws IOException {
-    User user = record.value();
+  private void parse(ConsumerRecord<String, Message<User>> record) throws IOException {
+    var message = record.value();
+    var user = message.getPayload();
 
     System.out.println("---------------------------------------------");
     System.out.println("Generating reading report for user " + user);
 
-    File target = new File(user.getReportPath());
+    var target = new File(user.getReportPath());
     IO.copyTo(path, target);
     IO.append(target, "Created for " + user.getUuid());
 

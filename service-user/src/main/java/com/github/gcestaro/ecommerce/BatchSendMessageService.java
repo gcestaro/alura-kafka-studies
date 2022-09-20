@@ -14,7 +14,7 @@ public class BatchSendMessageService {
   private final Connection connection;
 
   BatchSendMessageService() throws SQLException {
-    String url = "jdbc:sqlite:service-user/target/users_database.db";
+    var url = "jdbc:sqlite:service-user/target/users_database.db";
     connection = DriverManager.getConnection(url);
 
     try {
@@ -33,21 +33,23 @@ public class BatchSendMessageService {
     var batchSendMessageService = new BatchSendMessageService();
 
     try (var kafkaService = new KafkaService<>(BatchSendMessageService.class.getSimpleName(),
-        "SEND_MESSAGE_TO_ALL_USERS", batchSendMessageService::parse, String.class, Map.of())) {
+        "SEND_MESSAGE_TO_ALL_USERS", batchSendMessageService::parse, Map.of())) {
       kafkaService.run();
     }
   }
 
-  private void parse(ConsumerRecord<String, String> record) throws SQLException {
-    String topicName = record.value();
+  private void parse(ConsumerRecord<String, Message<String>> record) throws SQLException {
+    var message = record.value();
+
+    var topicName = message.getPayload();
 
     System.out.println("---------------------------------------------");
     System.out.println("Processing new batch");
     System.out.println("Topic: " + topicName);
 
-    List<User> users = findAllUsers();
+    var users = findAllUsers();
 
-    for (User user : users) {
+    for (var user : users) {
       userDispatcher.send(topicName, user.getUuid(), user);
     }
   }
@@ -57,7 +59,8 @@ public class BatchSendMessageService {
         "select uuid from Users");
     var results = exists.executeQuery();
 
-    List<User> users = new ArrayList<>();
+    var users = new ArrayList<User>();
+
     while (results.next()) {
       String uuid = results.getString("uuid");
       users.add(new User(uuid));

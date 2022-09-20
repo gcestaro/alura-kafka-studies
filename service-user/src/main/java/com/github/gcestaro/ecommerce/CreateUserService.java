@@ -2,7 +2,6 @@ package com.github.gcestaro.ecommerce;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.UUID;
@@ -14,7 +13,7 @@ public class CreateUserService {
   private final Connection connection;
 
   CreateUserService() throws SQLException {
-    String url = "jdbc:sqlite:service-user/target/users_database.db";
+    var url = "jdbc:sqlite:target/users_database.db";
     connection = DriverManager.getConnection(url);
 
     try {
@@ -33,13 +32,14 @@ public class CreateUserService {
     var createUserService = new CreateUserService();
 
     try (var kafkaService = new KafkaService<>(CreateUserService.class.getSimpleName(),
-        "ECOMMERCE_NEW_ORDER", createUserService::parse, Order.class, Map.of())) {
+        "ECOMMERCE_NEW_ORDER", createUserService::parse, Map.of())) {
       kafkaService.run();
     }
   }
 
-  private void parse(ConsumerRecord<String, Order> record) throws SQLException {
-    Order order = record.value();
+  private void parse(ConsumerRecord<String, Message<Order>> record) throws SQLException {
+    var message = record.value();
+    var order = message.getPayload();
 
     System.out.println("---------------------------------------------");
     System.out.println("Processing new order, checking for new user");
@@ -51,7 +51,7 @@ public class CreateUserService {
   }
 
   private void insertNewUser(String email) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement(
+    var statement = connection.prepareStatement(
         "insert into Users (uuid, email) values (?, ?)");
 
     var userId = UUID.randomUUID().toString();

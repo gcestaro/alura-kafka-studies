@@ -12,13 +12,14 @@ public class FraudDetectorService {
     var fraudDetectorService = new FraudDetectorService();
 
     try (var kafkaService = new KafkaService<>(FraudDetectorService.class.getSimpleName(),
-        "ECOMMERCE_NEW_ORDER", fraudDetectorService::parse, Order.class, Map.of())) {
+        "ECOMMERCE_NEW_ORDER", fraudDetectorService::parse, Map.of())) {
       kafkaService.run();
     }
   }
 
-  private void parse(ConsumerRecord<String, Order> record) {
-    Order order = record.value();
+  private void parse(ConsumerRecord<String, Message<Order>> record) {
+    var message = record.value();
+    var order = message.getPayload();
 
     System.out.println("---------------------------------------------");
     System.out.println("Processing new order, checking for fraud");

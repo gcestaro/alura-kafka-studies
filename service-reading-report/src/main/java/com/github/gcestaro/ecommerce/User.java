@@ -18,4 +18,8 @@ public class User {
   public String getUuid() {
     return uuid;
   }
+
+  public String getReportPath() {
+    return "target/" + uuid + "-report.txt";
+  }
 }

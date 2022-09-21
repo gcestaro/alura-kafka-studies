@@ -3,10 +3,12 @@ package com.github.gcestaro.ecommerce;
 import java.io.Closeable;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 class KafkaDispatcher<T> implements Closeable {
@@ -18,18 +20,25 @@ class KafkaDispatcher<T> implements Closeable {
   }
 
   void send(String topic, String key, CorrelationId correlationId, T payload) {
-    var message = new Message<>(correlationId, payload);
-    var callback = getCallback();
-    var record = new ProducerRecord<>(topic, key, message);
+    var future = sendAsync(topic, key, correlationId, payload);
 
     try {
-      producer.send(record, callback).get();
+      future.get();
     } catch (InterruptedException | ExecutionException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private static Callback getCallback() {
+  Future<RecordMetadata> sendAsync(String topic, String key, CorrelationId correlationId,
+      T payload) {
+    var message = new Message<>(correlationId, payload);
+    var callback = getCallback();
+    var record = new ProducerRecord<>(topic, key, message);
+
+    return producer.send(record, callback);
+  }
+
+  private Callback getCallback() {
     return (data, ex) -> {
       if (ex != null) {
         ex.printStackTrace();
@@ -41,7 +50,7 @@ class KafkaDispatcher<T> implements Closeable {
     };
   }
 
-  private static Properties getProperties() {
+  private Properties getProperties() {
     var properties = new Properties();
     properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
     properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,

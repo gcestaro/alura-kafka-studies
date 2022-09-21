@@ -91,13 +91,20 @@ In order to do that manually:
 4. Run all Kafka instances you created, each one pointing to a different configuration properties
    file (e.g. ```bin/kafka-server-start.sh config/server4.properties```)
 
+## Retries
+
+The property ```max.in.flight.requests.per.connection``` is used to determine the max retries
+attempt. The offset order on Kafka topic can be different from the order sent (i.e. if a broker
+falls while sending async messages). The default value is 5, so you may need to change it to 1 if
+you need to guarantee that the order sent is the same order in offsets.
+
 ## Notes
 
 * The max number of active consumers is determined by the number of partitions, because each
   consumer is going to read from a single partition.
 * The message key determines to which partition the message will be written. Kafka applies a hash on
   this key.
-* ISR = In Sync Replicas 
+* ISR = In Sync Replicas
 
 ## References
 

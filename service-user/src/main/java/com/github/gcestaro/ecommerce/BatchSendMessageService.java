@@ -50,9 +50,11 @@ public class BatchSendMessageService {
     var users = findAllUsers();
 
     for (var user : users) {
-      userDispatcher.send(topicName, user.getUuid(),
+      userDispatcher.sendAsync(topicName, user.getUuid(),
           message.getId().continueWith(
               BatchSendMessageService.class.getSimpleName()), user);
+
+      System.out.println("Sent for user " + user.getUuid());
     }
   }
 

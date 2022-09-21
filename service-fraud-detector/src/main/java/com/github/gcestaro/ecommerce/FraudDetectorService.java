@@ -2,13 +2,14 @@ package com.github.gcestaro.ecommerce;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 public class FraudDetectorService {
 
   private final KafkaDispatcher<Order> kafkaDispatcher = new KafkaDispatcher<>();
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws ExecutionException, InterruptedException {
     var fraudDetectorService = new FraudDetectorService();
 
     try (var kafkaService = new KafkaService<>(FraudDetectorService.class.getSimpleName(),
@@ -17,7 +18,8 @@ public class FraudDetectorService {
     }
   }
 
-  private void parse(ConsumerRecord<String, Message<Order>> record) {
+  private void parse(ConsumerRecord<String, Message<Order>> record)
+      throws ExecutionException, InterruptedException {
     var message = record.value();
     var order = message.getPayload();
 

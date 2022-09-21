@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 public class ReadingReportService {
@@ -11,7 +12,7 @@ public class ReadingReportService {
   private static final Path path = new File("src/main/resources/report.txt").toPath();
 
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws ExecutionException, InterruptedException {
     var readingReportService = new ReadingReportService();
 
     try (var kafkaService = new KafkaService<>(ReadingReportService.class.getSimpleName(),

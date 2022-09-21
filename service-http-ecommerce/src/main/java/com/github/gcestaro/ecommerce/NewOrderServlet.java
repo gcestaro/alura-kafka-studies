@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public class NewOrderServlet extends HttpServlet {
 
@@ -27,22 +28,24 @@ public class NewOrderServlet extends HttpServlet {
     var orderId = UUID.randomUUID().toString();
     var order = new Order(orderId, amount, email);
 
-    orderDispatcher.send("ECOMMERCE_NEW_ORDER", email,
-        new CorrelationId(
-            NewOrderServlet.class.getSimpleName()), order);
-
-    var emailMesssage = "Thank you for your order! We are processing your request.";
-    var emailCode = new Email("test@test.com", emailMesssage);
-    emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email,
-        new CorrelationId(
-            NewOrderServlet.class.getSimpleName()), emailCode);
-
-    var message = "New order process executed successfully";
-    System.out.println(message);
     try {
+      orderDispatcher.send("ECOMMERCE_NEW_ORDER", email,
+          new CorrelationId(
+              NewOrderServlet.class.getSimpleName()), order);
+
+      var emailMesssage = "Thank you for your order! We are processing your request.";
+      var emailCode = new Email("test@test.com", emailMesssage);
+      emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email,
+          new CorrelationId(
+              NewOrderServlet.class.getSimpleName()), emailCode);
+
+      var message = "New order process executed successfully";
+      System.out.println(message);
+
       response.getWriter().println(message);
       response.setStatus(HttpServletResponse.SC_OK);
-    } catch (IOException e) {
+
+    } catch (ExecutionException | InterruptedException | IOException e) {
       throw new RuntimeException(e);
     }
   }

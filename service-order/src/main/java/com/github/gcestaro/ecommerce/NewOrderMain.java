@@ -2,10 +2,11 @@ package com.github.gcestaro.ecommerce;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public class NewOrderMain {
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws ExecutionException, InterruptedException {
 
     try (var orderDispatcher = new KafkaDispatcher<Order>()) {
       try (var emailDispatcher = new KafkaDispatcher<Email>()) {

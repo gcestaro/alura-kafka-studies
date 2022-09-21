@@ -19,14 +19,9 @@ class KafkaDispatcher<T> implements Closeable {
     this.producer = new KafkaProducer<>(getProperties());
   }
 
-  void send(String topic, String key, CorrelationId correlationId, T payload) {
-    var future = sendAsync(topic, key, correlationId, payload);
-
-    try {
-      future.get();
-    } catch (InterruptedException | ExecutionException e) {
-      throw new RuntimeException(e);
-    }
+  void send(String topic, String key, CorrelationId correlationId, T payload)
+      throws ExecutionException, InterruptedException {
+    sendAsync(topic, key, correlationId, payload).get();
   }
 
   Future<RecordMetadata> sendAsync(String topic, String key, CorrelationId correlationId,

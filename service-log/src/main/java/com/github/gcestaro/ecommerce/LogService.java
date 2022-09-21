@@ -1,6 +1,7 @@
 package com.github.gcestaro.ecommerce;
 
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -8,7 +9,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 
 public class LogService {
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws ExecutionException, InterruptedException {
     var logService = new LogService();
     try (var kafkaService = new KafkaService(LogService.class.getSimpleName(),
         Pattern.compile("ECOMMERCE.*"), logService::parse,

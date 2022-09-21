@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 public class BatchSendMessageService {
@@ -29,7 +30,8 @@ public class BatchSendMessageService {
     }
   }
 
-  public static void main(String[] args) throws SQLException {
+  public static void main(String[] args)
+      throws SQLException, ExecutionException, InterruptedException {
     var batchSendMessageService = new BatchSendMessageService();
 
     try (var kafkaService = new KafkaService<>(BatchSendMessageService.class.getSimpleName(),

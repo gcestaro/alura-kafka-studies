@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -35,18 +36,27 @@ class KafkaService<T> implements Closeable {
     this.consumer = new KafkaConsumer<>(getProperties(properties, consumerGroup));
   }
 
-  void run() {
-    while (true) {
-      var records = consumer.poll(Duration.ofMillis(100));
-      if (!records.isEmpty()) {
-        System.out.println("Found " + records.count() + " records!");
+  void run() throws ExecutionException, InterruptedException {
+    try (var deadLetter = new KafkaDispatcher<>()) {
 
-        for (var record : records) {
-          try {
-            function.consume(record);
-          } catch (Exception e) {
-            // catch any exception and only logs. Process next message
-            e.printStackTrace();
+      while (true) {
+        var records = consumer.poll(Duration.ofMillis(100));
+        if (!records.isEmpty()) {
+          System.out.println("Found " + records.count() + " records!");
+
+          for (var record : records) {
+            try {
+              function.consume(record);
+            } catch (Exception e) {
+              // catch any exception and only logs. Process next message
+              e.printStackTrace();
+              var message = record.value();
+              var correlationId = message.getId();
+
+              deadLetter.send("ECOMMERCE_DEADLETTER", correlationId.toString(),
+                  correlationId.continueWith("DeadLetter"),
+                  new GsonSerializer<>().serialize("", message));
+            }
           }
         }
       }

@@ -14,7 +14,7 @@ public class BatchSendMessageService {
   private final Connection connection;
 
   BatchSendMessageService() throws SQLException {
-    var url = "jdbc:sqlite:service-user/target/users_database.db";
+    var url = "jdbc:sqlite:target/users_database.db";
     connection = DriverManager.getConnection(url);
 
     try {
@@ -33,7 +33,7 @@ public class BatchSendMessageService {
     var batchSendMessageService = new BatchSendMessageService();
 
     try (var kafkaService = new KafkaService<>(BatchSendMessageService.class.getSimpleName(),
-        "SEND_MESSAGE_TO_ALL_USERS", batchSendMessageService::parse, Map.of())) {
+        "ECOMMERCE_SEND_MESSAGE_TO_ALL_USERS", batchSendMessageService::parse, Map.of())) {
       kafkaService.run();
     }
   }
@@ -50,7 +50,9 @@ public class BatchSendMessageService {
     var users = findAllUsers();
 
     for (var user : users) {
-      userDispatcher.send(topicName, user.getUuid(), user);
+      userDispatcher.send(topicName, user.getUuid(),
+          message.getId().continueWith(
+              BatchSendMessageService.class.getSimpleName()), user);
     }
   }
 

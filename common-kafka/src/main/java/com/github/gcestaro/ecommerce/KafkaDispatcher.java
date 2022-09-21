@@ -17,8 +17,8 @@ class KafkaDispatcher<T> implements Closeable {
     this.producer = new KafkaProducer<>(getProperties());
   }
 
-  void send(String topic, String key, T payload) {
-    var message = new Message<>(new CorrelationId(), payload);
+  void send(String topic, String key, CorrelationId correlationId, T payload) {
+    var message = new Message<>(correlationId, payload);
     var callback = getCallback();
     var record = new ProducerRecord<>(topic, key, message);
 

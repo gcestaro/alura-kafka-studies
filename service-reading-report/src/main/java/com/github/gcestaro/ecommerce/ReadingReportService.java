@@ -15,7 +15,7 @@ public class ReadingReportService {
     var readingReportService = new ReadingReportService();
 
     try (var kafkaService = new KafkaService<>(ReadingReportService.class.getSimpleName(),
-        "USER_GENERATE_READING_REPORT", readingReportService::parse, Map.of())) {
+        "ECOMMERCE_USER_GENERATE_READING_REPORT", readingReportService::parse, Map.of())) {
       kafkaService.run();
     }
   }

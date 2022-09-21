@@ -37,10 +37,14 @@ public class FraudDetectorService {
       System.out.println("It is a fraud!");
       kafkaDispatcher.send("ECOMMERCE_ORDER_REJECTED",
           FraudDetectorService.class.getSimpleName(),
+          message.getId().continueWith(
+              FraudDetectorService.class.getSimpleName()),
           order);
     } else {
       kafkaDispatcher.send("ECOMMERCE_ORDER_APPROVED",
           order.getEmail(),
+          message.getId().continueWith(
+              FraudDetectorService.class.getSimpleName()),
           order);
       System.out.println("Order processed");
     }

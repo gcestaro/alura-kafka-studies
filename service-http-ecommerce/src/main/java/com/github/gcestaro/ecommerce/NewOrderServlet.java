@@ -1,7 +1,5 @@
 package com.github.gcestaro.ecommerce;
 
-import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,11 +27,15 @@ public class NewOrderServlet extends HttpServlet {
     var orderId = UUID.randomUUID().toString();
     var order = new Order(orderId, amount, email);
 
-    orderDispatcher.send("ECOMMERCE_NEW_ORDER", email, order);
+    orderDispatcher.send("ECOMMERCE_NEW_ORDER", email,
+        new CorrelationId(
+            NewOrderServlet.class.getSimpleName()), order);
 
     var emailMesssage = "Thank you for your order! We are processing your request.";
     var emailCode = new Email("test@test.com", emailMesssage);
-    emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email, emailCode);
+    emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email,
+        new CorrelationId(
+            NewOrderServlet.class.getSimpleName()), emailCode);
 
     var message = "New order process executed successfully";
     System.out.println(message);

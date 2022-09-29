@@ -1,21 +1,17 @@
 package com.github.gcestaro.ecommerce;
 
-import com.github.gcestaro.ecommerce.consumer.KafkaService;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import com.github.gcestaro.ecommerce.consumer.ConsumerService;
+import com.github.gcestaro.ecommerce.consumer.ServiceRunner;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-public class EmailService {
+public class EmailService implements ConsumerService<Email> {
 
-  public static void main(String[] args) throws ExecutionException, InterruptedException {
-    var emailService = new EmailService();
-    try (var kafkaService = new KafkaService<>(EmailService.class.getSimpleName(),
-        "ECOMMERCE_SEND_EMAIL", emailService::parse, Map.of())) {
-      kafkaService.run();
-    }
+  public static void main(String[] args) {
+    new ServiceRunner<>(EmailService::new).start(5);
   }
 
-  private void parse(ConsumerRecord<String, Message<Email>> record) {
+  @Override
+  public void parse(ConsumerRecord<String, Message<Email>> record) {
     var message = record.value();
 
     System.out.println("---------------------------------------------");
@@ -30,5 +26,15 @@ public class EmailService {
       throw new RuntimeException(e);
     }
     System.out.println("Email sent");
+  }
+
+  @Override
+  public String getTopic() {
+    return "ECOMMERCE_SEND_EMAIL";
+  }
+
+  @Override
+  public String getConsumerGroup() {
+    return EmailService.class.getSimpleName();
   }
 }

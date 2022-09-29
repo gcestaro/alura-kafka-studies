@@ -34,12 +34,6 @@ public class NewOrderServlet extends HttpServlet {
           new CorrelationId(
               NewOrderServlet.class.getSimpleName()), order);
 
-      var emailMesssage = "Thank you for your order! We are processing your request.";
-      var emailCode = new Email("test@test.com", emailMesssage);
-      emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email,
-          new CorrelationId(
-              NewOrderServlet.class.getSimpleName()), emailCode);
-
       var message = "New order process executed successfully";
       System.out.println(message);
 

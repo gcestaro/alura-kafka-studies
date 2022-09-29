@@ -1,5 +1,6 @@
 package com.github.gcestaro.ecommerce;
 
+import com.github.gcestaro.ecommerce.consumer.KafkaService;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;

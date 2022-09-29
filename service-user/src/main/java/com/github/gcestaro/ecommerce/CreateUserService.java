@@ -1,5 +1,7 @@
 package com.github.gcestaro.ecommerce;
 
+import com.github.gcestaro.ecommerce.consumer.KafkaService;
+import com.github.gcestaro.ecommerce.dispatcher.KafkaDispatcher;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

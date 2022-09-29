@@ -1,5 +1,6 @@
 package com.github.gcestaro.ecommerce;
 
+import com.github.gcestaro.ecommerce.consumer.KafkaService;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;

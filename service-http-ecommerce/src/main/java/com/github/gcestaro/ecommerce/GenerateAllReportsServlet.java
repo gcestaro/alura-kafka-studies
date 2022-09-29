@@ -1,5 +1,6 @@
 package com.github.gcestaro.ecommerce;
 
+import com.github.gcestaro.ecommerce.dispatcher.KafkaDispatcher;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

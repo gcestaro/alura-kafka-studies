@@ -1,5 +1,7 @@
-package com.github.gcestaro.ecommerce;
+package com.github.gcestaro.ecommerce.consumer;
 
+import com.github.gcestaro.ecommerce.Message;
+import com.github.gcestaro.ecommerce.MessageAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.kafka.common.serialization.Deserializer;

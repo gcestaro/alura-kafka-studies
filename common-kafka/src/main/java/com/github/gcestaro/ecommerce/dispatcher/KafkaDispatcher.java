@@ -1,5 +1,7 @@
-package com.github.gcestaro.ecommerce;
+package com.github.gcestaro.ecommerce.dispatcher;
 
+import com.github.gcestaro.ecommerce.CorrelationId;
+import com.github.gcestaro.ecommerce.Message;
 import java.io.Closeable;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
@@ -11,20 +13,20 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
 
-class KafkaDispatcher<T> implements Closeable {
+public class KafkaDispatcher<T> implements Closeable {
 
   private final KafkaProducer<String, Message<T>> producer;
 
-  KafkaDispatcher() {
+  public KafkaDispatcher() {
     this.producer = new KafkaProducer<>(getProperties());
   }
 
-  void send(String topic, String key, CorrelationId correlationId, T payload)
+  public void send(String topic, String key, CorrelationId correlationId, T payload)
       throws ExecutionException, InterruptedException {
     sendAsync(topic, key, correlationId, payload).get();
   }
 
-  Future<RecordMetadata> sendAsync(String topic, String key, CorrelationId correlationId,
+  public Future<RecordMetadata> sendAsync(String topic, String key, CorrelationId correlationId,
       T payload) {
     var message = new Message<>(correlationId, payload);
     var callback = getCallback();

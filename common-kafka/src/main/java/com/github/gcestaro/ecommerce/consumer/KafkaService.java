@@ -1,5 +1,9 @@
-package com.github.gcestaro.ecommerce;
+package com.github.gcestaro.ecommerce.consumer;
 
+import com.github.gcestaro.ecommerce.ConsumerFunction;
+import com.github.gcestaro.ecommerce.Message;
+import com.github.gcestaro.ecommerce.dispatcher.GsonSerializer;
+import com.github.gcestaro.ecommerce.dispatcher.KafkaDispatcher;
 import java.io.Closeable;
 import java.time.Duration;
 import java.util.Collections;
@@ -12,19 +16,19 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
-class KafkaService<T> implements Closeable {
+public class KafkaService<T> implements Closeable {
 
 
   private final KafkaConsumer<String, Message<T>> consumer;
   private final ConsumerFunction<T> function;
 
-  KafkaService(String consumerGroup, String topic, ConsumerFunction<T> function,
+  public KafkaService(String consumerGroup, String topic, ConsumerFunction<T> function,
       Map<String, String> properties) {
     this(consumerGroup, function, properties);
     consumer.subscribe(Collections.singletonList(topic));
   }
 
-  KafkaService(String consumerGroup, Pattern pattern, ConsumerFunction<T> function,
+  public KafkaService(String consumerGroup, Pattern pattern, ConsumerFunction<T> function,
       Map<String, String> properties) {
     this(consumerGroup, function, properties);
     consumer.subscribe(pattern);
@@ -36,7 +40,7 @@ class KafkaService<T> implements Closeable {
     this.consumer = new KafkaConsumer<>(getProperties(properties, consumerGroup));
   }
 
-  void run() throws ExecutionException, InterruptedException {
+  public void run() throws ExecutionException, InterruptedException {
     try (var deadLetter = new KafkaDispatcher<>()) {
 
       while (true) {

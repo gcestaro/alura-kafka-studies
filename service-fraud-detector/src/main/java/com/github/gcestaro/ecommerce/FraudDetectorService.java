@@ -1,5 +1,7 @@
 package com.github.gcestaro.ecommerce;
 
+import com.github.gcestaro.ecommerce.consumer.KafkaService;
+import com.github.gcestaro.ecommerce.dispatcher.KafkaDispatcher;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;

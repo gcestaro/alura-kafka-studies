@@ -1,27 +1,40 @@
 package com.github.gcestaro.ecommerce;
 
-import com.github.gcestaro.ecommerce.consumer.KafkaService;
+import com.github.gcestaro.ecommerce.consumer.ConsumerService;
+import com.github.gcestaro.ecommerce.consumer.ServiceRunner;
+import com.github.gcestaro.ecommerce.database.LocalDatabase;
 import com.github.gcestaro.ecommerce.dispatcher.KafkaDispatcher;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-public class FraudDetectorService {
+public class FraudDetectorService implements ConsumerService<Order> {
+
+  private static final String SQL_CREATE_TABLE_FRAUDS = "create table "
+      + "Orders ("
+      + "uuid varchar(200) primary key, "
+      + "is_fraud boolean"
+      + " )";
+  private static final String SQL_EXISTS_ORDER = "select uuid from Orders where uuid = ? limit 1";
 
   private final KafkaDispatcher<Order> kafkaDispatcher = new KafkaDispatcher<>();
 
-  public static void main(String[] args) throws ExecutionException, InterruptedException {
-    var fraudDetectorService = new FraudDetectorService();
+  private final LocalDatabase database;
 
-    try (var kafkaService = new KafkaService<>(FraudDetectorService.class.getSimpleName(),
-        "ECOMMERCE_NEW_ORDER", fraudDetectorService::parse, Map.of())) {
-      kafkaService.run();
-    }
+  public FraudDetectorService() throws SQLException {
+    database = new LocalDatabase("frauds_database");
+    database.createIfNotExists(SQL_CREATE_TABLE_FRAUDS);
   }
 
-  private void parse(ConsumerRecord<String, Message<Order>> record)
-      throws ExecutionException, InterruptedException {
+  public static void main(String[] args) {
+    new ServiceRunner<>(FraudDetectorService::new).start(1);
+  }
+
+  @Override
+  public void parse(ConsumerRecord<String, Message<Order>> record)
+      throws ExecutionException, InterruptedException, SQLException {
     var message = record.value();
     var order = message.getPayload();
 
@@ -31,6 +44,13 @@ public class FraudDetectorService {
     System.out.println(order);
     System.out.println(record.partition());
     System.out.println(record.offset());
+
+    if (isProcessed(order)) {
+      System.out.println("Ignoring order " + order.getOrderId()
+          + "due to it is already processed by fraud detector");
+      return;
+    }
+
     try {
       Thread.sleep(500);
     } catch (InterruptedException e) {
@@ -38,6 +58,9 @@ public class FraudDetectorService {
     }
 
     if (isFraud(order)) {
+      database.insert("insert into Orders (uuid, is_fraud) values (?, true)",
+          Map.of(1, order.getOrderId()));
+
       System.out.println("It is a fraud!");
       kafkaDispatcher.send("ECOMMERCE_ORDER_REJECTED",
           FraudDetectorService.class.getSimpleName(),
@@ -45,6 +68,9 @@ public class FraudDetectorService {
               FraudDetectorService.class.getSimpleName()),
           order);
     } else {
+      database.insert("insert into Orders (uuid, is_fraud) values (?, false)",
+          Map.of(1, order.getOrderId()));
+
       kafkaDispatcher.send("ECOMMERCE_ORDER_APPROVED",
           order.getEmail(),
           message.getId().continueWith(
@@ -52,6 +78,20 @@ public class FraudDetectorService {
           order);
       System.out.println("Order processed");
     }
+  }
+
+  private boolean isProcessed(Order order) throws SQLException {
+    return database.exists(SQL_EXISTS_ORDER, Map.of(1, order.getOrderId()));
+  }
+
+  @Override
+  public String getTopic() {
+    return "ECOMMERCE_NEW_ORDER";
+  }
+
+  @Override
+  public String getConsumerGroup() {
+    return FraudDetectorService.class.getSimpleName();
   }
 
   private boolean isFraud(Order order) {

@@ -18,6 +18,9 @@ public class Order {
     return value;
   }
 
+  public String getOrderId() {
+    return orderId;
+  }
 
   @Override
   public String toString() {

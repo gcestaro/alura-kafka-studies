@@ -2,7 +2,6 @@ package com.github.gcestaro.ecommerce.consumer;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
 public class ServiceProvider<T> implements Callable<Void> {
 
@@ -13,7 +12,7 @@ public class ServiceProvider<T> implements Callable<Void> {
   }
 
   @Override
-  public Void call() throws ExecutionException, InterruptedException {
+  public Void call() throws Exception {
     var service = factory.create();
 
     try (var kafkaService = new KafkaService<>(service.getConsumerGroup(),

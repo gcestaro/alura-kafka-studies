@@ -1,47 +1,36 @@
 package com.github.gcestaro.ecommerce;
 
-import com.github.gcestaro.ecommerce.consumer.KafkaService;
-import com.github.gcestaro.ecommerce.dispatcher.KafkaDispatcher;
-import java.sql.Connection;
-import java.sql.DriverManager;
+import com.github.gcestaro.ecommerce.consumer.ConsumerService;
+import com.github.gcestaro.ecommerce.consumer.ServiceRunner;
+import com.github.gcestaro.ecommerce.database.LocalDatabase;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-public class CreateUserService {
+public class CreateUserService implements ConsumerService<Order> {
 
-  private final KafkaDispatcher<User> kafkaDispatcher = new KafkaDispatcher<>();
-  private final Connection connection;
+  private static final String SQL_CREATE_TABLE_USERS = "create table "
+      + "Users ("
+      + "uuid varchar(200) primary key, "
+      + "email varchar(200)"
+      + " )";
+  private static final String SQL_INSERT_USER = "insert into Users (uuid, email) values (?, ?)";
+  private static final String SQL_EXISTS_USER = "select uuid from Users where email = ? limit 1";
 
-  CreateUserService() throws SQLException {
-    var url = "jdbc:sqlite:target/users_database.db";
-    connection = DriverManager.getConnection(url);
+  private final LocalDatabase database;
 
-    try {
-      connection.createStatement().execute("create table "
-          + "Users ("
-          + "uuid varchar(200) primary key, "
-          + "email varchar(200)"
-          + " )");
-    } catch (SQLException ex) {
-      System.out.println("Ignoring already created table Users");
-      ex.printStackTrace();
-    }
+  public static void main(String[] args) {
+    new ServiceRunner<>(CreateUserService::new).start(1);
   }
 
-  public static void main(String[] args)
-      throws SQLException, ExecutionException, InterruptedException {
-    var createUserService = new CreateUserService();
-
-    try (var kafkaService = new KafkaService<>(CreateUserService.class.getSimpleName(),
-        "ECOMMERCE_NEW_ORDER", createUserService::parse, Map.of())) {
-      kafkaService.run();
-    }
+  public CreateUserService() throws SQLException {
+    database = new LocalDatabase("users_database");
+    database.createIfNotExists(SQL_CREATE_TABLE_USERS);
   }
 
-  private void parse(ConsumerRecord<String, Message<Order>> record) throws SQLException {
+  @Override
+  public void parse(ConsumerRecord<String, Message<Order>> record) throws SQLException {
     var message = record.value();
     var order = message.getPayload();
 
@@ -54,27 +43,25 @@ public class CreateUserService {
     }
   }
 
-  private void insertNewUser(String email) throws SQLException {
-    var statement = connection.prepareStatement(
-        "insert into Users (uuid, email) values (?, ?)");
+  @Override
+  public String getTopic() {
+    return "ECOMMERCE_NEW_ORDER";
+  }
 
+  @Override
+  public String getConsumerGroup() {
+    return CreateUserService.class.getSimpleName();
+  }
+
+  private void insertNewUser(String email) throws SQLException {
     var userId = UUID.randomUUID().toString();
 
-    statement.setString(1, userId);
-    statement.setString(2, email);
-
-    statement.execute();
+    database.insert(SQL_INSERT_USER, Map.of(1, userId, 2, email));
 
     System.out.println("User " + userId + " , email " + email + " added.");
-
   }
 
   private boolean isNewUser(String email) throws SQLException {
-    var exists = connection.prepareStatement(
-        "select uuid from Users where email = ? limit 1");
-    exists.setString(1, email);
-    var results = exists.executeQuery();
-
-    return !results.next();
+    return database.exists(SQL_EXISTS_USER, Map.of(1, email));
   }
 }

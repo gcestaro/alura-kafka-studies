@@ -24,7 +24,7 @@ public class FraudDetectorService implements ConsumerService<Order> {
   private final LocalDatabase database;
 
   public FraudDetectorService() throws SQLException {
-    database = new LocalDatabase("frauds_database");
+    database = new LocalDatabase("order_database");
     database.createIfNotExists(SQL_CREATE_TABLE_FRAUDS);
   }
 
@@ -45,9 +45,9 @@ public class FraudDetectorService implements ConsumerService<Order> {
     System.out.println(record.partition());
     System.out.println(record.offset());
 
-    if (isProcessed(order)) {
+    if (wasProcessed(order)) {
       System.out.println("Ignoring order " + order.getOrderId()
-          + "due to it is already processed by fraud detector");
+          + "due to it was already processed by fraud detector");
       return;
     }
 
@@ -80,7 +80,7 @@ public class FraudDetectorService implements ConsumerService<Order> {
     }
   }
 
-  private boolean isProcessed(Order order) throws SQLException {
+  private boolean wasProcessed(Order order) throws SQLException {
     return database.exists(SQL_EXISTS_ORDER, Map.of(1, order.getOrderId()));
   }
 

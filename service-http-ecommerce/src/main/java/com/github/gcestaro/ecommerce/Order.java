@@ -14,6 +14,10 @@ public class Order {
     this.email = email;
   }
 
+  public String getOrderId() {
+    return orderId;
+  }
+
   @Override
   public String toString() {
     return "Order{" +

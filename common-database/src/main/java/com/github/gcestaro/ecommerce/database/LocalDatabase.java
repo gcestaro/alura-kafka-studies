@@ -1,12 +1,14 @@
 package com.github.gcestaro.ecommerce.database;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 
-public class LocalDatabase {
+public class LocalDatabase implements Closeable {
 
   private final Connection connection;
 
@@ -23,9 +25,9 @@ public class LocalDatabase {
     }
   }
 
-  public void insert(String sql, Map<Integer, Object> values) throws SQLException {
+  public boolean insert(String sql, Map<Integer, Object> values) throws SQLException {
     try (var statement = createStatement(sql, values)) {
-      statement.execute();
+      return statement.execute();
     }
   }
 
@@ -46,5 +48,14 @@ public class LocalDatabase {
     }
 
     return statement;
+  }
+
+  @Override
+  public void close() throws IOException {
+    try {
+      connection.close();
+    } catch (SQLException e) {
+      throw new IOException(e);
+    }
   }
 }
